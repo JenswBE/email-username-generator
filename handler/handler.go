@@ -32,7 +32,10 @@ func NewHandler(cfg config.Config) (http.HandlerFunc, error) {
 		if externalParty != "" {
 			value = getEmail(cfg.Prefix, externalParty, cfg.SuffixRandomSet, cfg.Separator)
 		}
-		tmpl.Execute(w, templateData{Value: value})
+		if err := tmpl.Execute(w, templateData{Value: value}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Failed to execute template: %v", err)
+		}
 	}, nil
 }
 
