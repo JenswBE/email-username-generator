@@ -29,7 +29,11 @@ func main() {
 	http.DefaultServeMux.HandleFunc("/", handler)
 
 	// Start service
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	server := &http.Server{
+		Addr:              ":8080",
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Error().Err(err).Msg("Service stopped listening")
 	}
 }

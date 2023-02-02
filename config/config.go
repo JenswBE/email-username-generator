@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"os"
 )
 
@@ -17,8 +16,8 @@ type Config struct {
 func GetConfig() (Config, error) {
 	suffixRandomSet := LookupEnvWithFallback("EPG_SUFFIX_RANDOM_SET", "abcdefghijklmnopqrstuvwxyz0123456789")
 	if suffixRandomSet == "" {
-		// Env var is explicetly set to an empty string
-		return Config{}, errors.New("EPG_SUFFIX_RANDOM_SET cannot be an empty string")
+		// Env var is explicitly set to an empty string
+		return Config{}, EnvVarIsEmptyError{envVar: "EPG_SUFFIX_RANDOM_SET"}
 	}
 
 	return Config{

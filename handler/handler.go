@@ -56,9 +56,10 @@ func getEmail(prefix, externalParty string, suffixRandomSet, separator string) s
 	_, _ = output.WriteString(separator)
 
 	// Add suffix
-	// Note: This uses an insecure random source. This is by design as suffix is not security sensitive.
 	ranomSetLength := len(suffixRandomSet)
 	for i := 0; i < SuffixLength; i++ {
+		//#nosec G404 -- This uses an insecure random source.
+		// This is by design as suffix is not security sensitive.
 		_ = output.WriteByte(suffixRandomSet[rand.Intn(ranomSetLength)])
 	}
 	return output.String()
