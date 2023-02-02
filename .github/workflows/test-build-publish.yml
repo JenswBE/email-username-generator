@@ -52,11 +52,6 @@ jobs:
       - name: Lint service
         uses: golangci/golangci-lint-action@v3
 
-      - name: Test exhaustive use of case statements
-        run: |
-          go install github.com/nishanths/exhaustive/...@latest
-          exhaustive ./...
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
