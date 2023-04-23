@@ -45,7 +45,10 @@ func Test_getEmail(t *testing.T) {
 
 	for desc, tc := range testCases {
 		t.Run(desc, func(t *testing.T) {
-			result := getEmail(tc.GivenPrefix, tc.GivenExternalParty, tc.GivenSuffixRandomSet, tc.GivenSeparator)
+			result, err := getEmail(tc.GivenPrefix, tc.GivenExternalParty, tc.GivenSuffixRandomSet, tc.GivenSeparator)
+			if err != nil {
+				t.Fatalf(`getEmail returned an error: %v`, err)
+			}
 			if !tc.Expected.Match([]byte(result)) {
 				t.Fatalf(`getEmail result "%s" does not match with regex "%s"`, result, tc.Expected)
 			}

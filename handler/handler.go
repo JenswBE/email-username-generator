@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"crypto/rand"
 	_ "embed"
 	"fmt"
 	"html/template"
-	"math/rand"
 	"net/http"
 	"strings"
 
@@ -30,7 +30,11 @@ func NewHandler(cfg config.Config) (http.HandlerFunc, error) {
 		externalParty := r.URL.Query().Get("p")
 		var value string
 		if externalParty != "" {
-			value = getEmail(cfg.Prefix, externalParty, cfg.SuffixRandomSet, cfg.Separator)
+			if value, err = getEmail(cfg.Prefix, externalParty, cfg.SuffixRandomSet, cfg.Separator); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "Failed to generate email: %v", err)
+				return
+			}
 		}
 		if err := tmpl.Execute(w, templateData{Value: value}); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -39,7 +43,7 @@ func NewHandler(cfg config.Config) (http.HandlerFunc, error) {
 	}, nil
 }
 
-func getEmail(prefix, externalParty string, suffixRandomSet, separator string) string {
+func getEmail(prefix, externalParty string, suffixRandomSet, separator string) (string, error) {
 	// Prepare
 	cleanedParty := strings.ReplaceAll(strings.TrimSpace(externalParty), " ", separator)
 	output := strings.Builder{}
@@ -56,11 +60,13 @@ func getEmail(prefix, externalParty string, suffixRandomSet, separator string) s
 	_, _ = output.WriteString(separator)
 
 	// Add suffix
-	ranomSetLength := len(suffixRandomSet)
-	for i := 0; i < SuffixLength; i++ {
-		//#nosec G404 -- This uses an insecure random source.
-		// This is by design as suffix is not security sensitive.
-		_ = output.WriteByte(suffixRandomSet[rand.Intn(ranomSetLength)])
+	randomSetLength := len(suffixRandomSet)
+	randomValues := make([]byte, SuffixLength)
+	if _, err := rand.Read(randomValues); err != nil {
+		return "", fmt.Errorf("failed to generated random value: %w", err)
 	}
-	return output.String()
+	for _, randomValue := range randomValues {
+		_ = output.WriteByte(suffixRandomSet[int(randomValue)%randomSetLength])
+	}
+	return output.String(), nil
 }
