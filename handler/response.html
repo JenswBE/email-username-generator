@@ -32,16 +32,24 @@
       Copy to clipboard
     </button>
     {{ end }}
-    <form method="get" style="margin-top: 20px">
-      <label for="external_party">External Party:</label>
+    <form method="get" style="display: block; margin-top: 20px">
+      <label for="external_party">External Party*:</label>
       <input
         name="p"
         id="external_party"
         autocomplete="off"
         autofocus
         style="display: block; margin-top: 5px"
+        value="{{ .ExternalParty }}"
       />
-      <button type="submit" style="display: block; margin-top: 5px">
+      <label for="domain" style="display: block; padding-top: 15px;">Domain:</label>
+      <input
+        name="d"
+        id="domain"
+        style="display: block; margin-top: 5px"
+        value="{{ .Domain }}"
+      />
+      <button type="submit" style="display: block; margin-top: 15px">
         Submit
       </button>
     </form>

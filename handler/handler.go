@@ -17,7 +17,9 @@ var responsePage string
 const SuffixLength = 8
 
 type templateData struct {
-	Value string
+	Value         string
+	ExternalParty string
+	Domain        string
 }
 
 func NewHandler(cfg config.Config) (http.HandlerFunc, error) {
@@ -28,26 +30,32 @@ func NewHandler(cfg config.Config) (http.HandlerFunc, error) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		externalParty := r.URL.Query().Get("p")
+		domain := r.URL.Query().Get("d")
 		var value string
 		if externalParty != "" {
-			if value, err = getEmail(cfg.Prefix, externalParty, cfg.SuffixRandomSet, cfg.Separator); err != nil {
+			if value, err = getEmail(cfg.Prefix, externalParty, cfg.SuffixRandomSet, cfg.Separator, domain); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(w, "Failed to generate email: %v", err)
 				return
 			}
 		}
-		if err := tmpl.Execute(w, templateData{Value: value}); err != nil {
+		data := templateData{
+			Value:         value,
+			ExternalParty: externalParty,
+			Domain:        domain,
+		}
+		if err := tmpl.Execute(w, data); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Failed to execute template: %v", err)
 		}
 	}, nil
 }
 
-func getEmail(prefix, externalParty string, suffixRandomSet, separator string) (string, error) {
+func getEmail(prefix, externalParty string, suffixRandomSet, separator, domain string) (string, error) {
 	// Prepare
 	cleanedParty := strings.ReplaceAll(strings.TrimSpace(externalParty), " ", separator)
 	output := strings.Builder{}
-	output.Grow(len(prefix) + len(cleanedParty) + SuffixLength + 2) // Max 2 separators
+	output.Grow(len(prefix) + len(cleanedParty) + SuffixLength + 2 + 1 + len(domain)) // Max 2 separators + @ before domain
 
 	// Add prefix if defined
 	if prefix != "" {
@@ -67,6 +75,12 @@ func getEmail(prefix, externalParty string, suffixRandomSet, separator string) (
 	}
 	for _, randomValue := range randomValues {
 		_ = output.WriteByte(suffixRandomSet[int(randomValue)%randomSetLength])
+	}
+
+	// Add domain
+	if domain != "" {
+		output.WriteRune('@')
+		output.WriteString(domain)
 	}
 	return output.String(), nil
 }
