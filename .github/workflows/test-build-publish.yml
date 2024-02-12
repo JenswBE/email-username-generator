@@ -8,7 +8,7 @@ on:
 env:
   DOCKER_HUB_REPO: jenswbe/email-username-generator
   DOCKER_HUB_USER: jenswbebot
-  GO_VERSION: "1.21"
+  GO_VERSION: "1.22"
   PLATFORMS: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
         run: wget -O .golangci.yml https://raw.githubusercontent.com/JenswBE/setup/main/programming_configs/golang/.golangci.yml
 
       - name: Lint service
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
