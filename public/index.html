@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Email Prefix Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+      integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="/main.css" />
+    <script src="/update-theme.js"></script>
+  </head>
+  <body>
+    <div class="container pt-4">
+      <div class="row">
+        <div class="col-12 col-md-6 pe-md-4">
+          <form id="form-input" class="mt-md-3">
+            <div class="col-12">
+              <label for="input-external-party" class="form-label">
+                External Party:
+              </label>
+              <input
+                id="input-external-party"
+                autocomplete="off"
+                autofocus
+                class="form-control"
+              />
+            </div>
+            <div class="col-12 mt-3">
+              <label for="input-domain" class="form-label">
+                Domain (optional):
+              </label>
+              <input id="input-domain" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Generate</button>
+          </form>
+        </div>
+        <div id="col-result" class="col-12 col-md-6 ps-md-4">
+          <label for="input-result" class="form-label mt-5 mt-md-3">
+            Result
+          </label>
+          <input id="input-result" readonly class="form-control" />
+          <button
+            id="btn-copy-to-clipboard"
+            type="button"
+            class="btn btn-success mt-3"
+          >
+            Copy to clipboard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/fix-exports.js"></script>
+    <script src="/main.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+      integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </body>
+</html>

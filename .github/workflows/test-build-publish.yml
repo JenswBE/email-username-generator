@@ -1,15 +1,9 @@
 name: Test, build and publish Golang services
 on:
+  pull_request:
   push:
     branches: [main]
-    tags:
-      - "v*.*.*"
-
-env:
-  DOCKER_HUB_REPO: jenswbe/email-username-generator
-  DOCKER_HUB_USER: jenswbebot
-  GO_VERSION: "1.22"
-  PLATFORMS: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  workflow_dispatch:
 
 jobs:
   build-services:
@@ -18,63 +12,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Derive docker_tag
-        id: vars
-        shell: python
-        run: |
-          import os, re, sys
-          tag = os.environ['GITHUB_REF'].split('/').pop()
-          print(f"Tag: {tag}")
-          tags = []
-          semverRegex = r"^v\d+\.\d+\.\d+$"
-          if tag == 'main':
-            tags = ['latest']
-          elif re.match(semverRegex, tag):
-            tag_parts = tag.split(".")
-            tags = ['stable', tag, tag_parts[0], f"{tag_parts[0]}.{tag_parts[1]}"]
-          else:
-            sys.exit(f"Invalid tag {tag}. Must be main or a semver tag")
-          images = []
-          image_base = os.environ['DOCKER_HUB_REPO']
-          images = [f"{image_base}:{t}" for t in tags]
-          images_list = ",".join(images)
-          print(f"Images: {images_list}")
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-            output.write(f"images={images_list}{os.linesep}")
-
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-node@v4
         with:
-          go-version: ${{ env.GO_VERSION }}
+          node-version: lts/*
           check-latest: true
 
-      - name: Pull common linter configs
-        run: wget -O .golangci.yml https://raw.githubusercontent.com/JenswBE/setup/main/programming_configs/golang/.golangci.yml
+      - name: Install requirements
+        run: npm install
 
-      - name: Lint service
-        uses: golangci/golangci-lint-action@v6
+      - name: Transpile TypeScript
+        run: npx tsc
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Run unit tests
+        run: npm run test
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # - name: Publish to VPS
+      #   if: github.event_name != 'pull_request'
+      #   run: |
+      #     # Trust SSH host keys
+      #     mkdir -p ~/.ssh/
+      #     touch ~/.ssh/known_hosts
+      #     chmod 600 ~/.ssh/known_hosts
+      #     curl 'https://raw.githubusercontent.com/JenswBE/setup/main/server/files/po/rsyncd-public-keys.txt' >> ~/.ssh/known_hosts
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      #     # Setup SSH key
+      #     touch ssh_key
+      #     chmod 600 ssh_key
+      #     echo '${{ secrets.SSH_KEY }}' > ssh_key
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          platforms: ${{ env.PLATFORMS }}
-          push: true
-          tags: ${{ steps.vars.outputs.images }}
-
-      - name: Update repo description
-        uses: peter-evans/dockerhub-description@v4
-        with:
-          username: ${{ env.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ env.DOCKER_HUB_REPO }}
+      #     # Sync generated files
+      #     rsync --verbose --archive --delete --rsh='ssh -p ${{ vars.SSH_PORT }} -i ssh_key' public/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/

@@ -1,0 +1,5 @@
+@media (min-width: 768px) {
+  #col-result {
+    border-left: solid rgb(13, 110, 253) 3px;
+  }
+}
