@@ -26,19 +26,19 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-      # - name: Publish to VPS
-      #   if: github.event_name != 'pull_request'
-      #   run: |
-      #     # Trust SSH host keys
-      #     mkdir -p ~/.ssh/
-      #     touch ~/.ssh/known_hosts
-      #     chmod 600 ~/.ssh/known_hosts
-      #     curl 'https://raw.githubusercontent.com/JenswBE/setup/main/server/files/po/rsyncd-public-keys.txt' >> ~/.ssh/known_hosts
+      - name: Publish to VPS
+        if: github.event_name != 'pull_request'
+        run: |
+          # Trust SSH host keys
+          mkdir -p ~/.ssh/
+          touch ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          curl 'https://raw.githubusercontent.com/JenswBE/setup/main/server/files/po/rsyncd-public-keys.txt' >> ~/.ssh/known_hosts
 
-      #     # Setup SSH key
-      #     touch ssh_key
-      #     chmod 600 ssh_key
-      #     echo '${{ secrets.SSH_KEY }}' > ssh_key
+          # Setup SSH key
+          touch ssh_key
+          chmod 600 ssh_key
+          echo '${{ secrets.SSH_KEY }}' > ssh_key
 
-      #     # Sync generated files
-      #     rsync --verbose --archive --delete --rsh='ssh -p ${{ vars.SSH_PORT }} -i ssh_key' public/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/
+          # Sync generated files
+          rsync --verbose --archive --delete --rsh='ssh -p ${{ vars.SSH_PORT }} -i ssh_key' public/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/
